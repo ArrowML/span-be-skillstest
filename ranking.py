@@ -1,49 +1,59 @@
 import fileinput
+from functools import reduce
 from typing import Dict, List
-
-games_list = []
-teams_list = {}
-score = {'win': 3, 'draw': 1}
 
 def controller():
     buffer = []
+    process = [parseGameInput, calcScores, sortRankings, outputRankings]
     for line in fileinput.input():
-        if line.strip() == 'show table':
-            parseGameInput(buffer)    
+        if line.strip() == 'show ranking':
+            reduce(lambda x, y: y(x), process, buffer) 
         else:
             if line.strip() != '':
                 buffer.append(line)
     else:
-        parseGameInput(buffer) 
+        reduce(lambda x, y: y(x), process, buffer)
 
-# Parse input into dictionary    
-def parseGameInput(buffer: List):  
+# Parse input into base teams dictionary and create result list    
+def parseGameInput(buffer: List):
+    games_list = []
     for games in buffer:       
         results = games.split(', ')
         team1 = results[0].rsplit(' ', 1)
         team2 = results[1].rsplit(' ', 1)
         game = {"team1_name":team1[0], "team1_score":int(team1[1]), "team2_name":team2[0], "team2_score":int(team2[1].strip('\n'))}
         games_list.append(game)
-        teams_list[team1[0]] = 0
-        teams_list[team2[0]] = 0
-    calcScores(games_list)
+    return games_list 
 
-def calcScores(games: Dict):
+# calculate scores per team
+def calcScores(games: List):
+    score = {'win': 3, 'draw': 1}
+    team_scores = {}
     for game in games:
+        #set base values
+        if game['team1_name'] not in team_scores:
+            team_scores[game['team1_name']] = 0
+        if game['team2_name'] not in team_scores:
+            team_scores[game['team2_name']] = 0   
+        # add scores
         if game['team1_score'] > game['team2_score']:
-            teams_list[game['team1_name']] += score['win']
+            team_scores[game['team1_name']] += score['win']
         elif game['team2_score'] > game['team1_score']:
-            teams_list[game['team1_name']] += score['win']
+            team_scores[game['team2_name']] += score['win']
         elif game['team1_score'] == game['team2_score']:
-            teams_list[game['team1_name']] += score['draw']
-            teams_list[game['team2_name']] += score['draw']    
-    outputRankings(teams_list)
+            team_scores[game['team1_name']] += score['draw']
+            team_scores[game['team2_name']] += score['draw']     
+    return team_scores
 
-def outputRankings(ranking: List):
-    ranking = sorted(teams_list.items(), key=lambda x: (-x[1], x[0]))
-    for i in range(len(ranking)):
-        print( "%d. %s, %d pts" %((i+1), ranking[i][0], ranking[i][1] ))
+def sortRankings(team_scores: Dict):
+    ranking = sorted(team_scores.items(), key=lambda x: (-x[1], x[0]))
+    return ranking
+
+# output ordered ranking table
+def outputRankings(sorted_results: List):
+    for i in range(len(sorted_results)):
+        print( "%d. %s, %d pts" %((i+1), sorted_results[i][0], sorted_results[i][1] ))
     quit()    
 
-
-controller()
+if __name__ == "__main__":
+    controller()
