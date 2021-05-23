@@ -10,6 +10,8 @@ class TestRanking(unittest.TestCase):
         self.assertEqual(parsed_dict[0]['team2_name'], 'Hornets', 'Incorrecly parsed value: team2_name')
         self.assertEqual(parsed_dict[0]['team1_score'], 3, 'Incorrecly parsed value: team1_score')
         self.assertEqual(parsed_dict[0]['team2_score'], 3, 'Incorrecly parsed value: team2_score')
+        self.assertNotEqual(parsed_dict[0]['team1_name'], 'Wasps 3', 'Incorrecly parsed value: team1_name')
+        self.assertNotEqual(parsed_dict[0]['team1_name'], 'Hornets', 'Incorrecly parsed value: team1_name')
 
     def test_calcScores(self):
         test_list = [
@@ -18,13 +20,16 @@ class TestRanking(unittest.TestCase):
         ]
         scores = calcScores(test_list)
         self.assertEqual(scores['Wasps'], 4, 'Incorrect Score calculation')
+        self.assertNotEqual(scores['Wasps'], 3, 'Incorrect Score calculation')
         self.assertEqual(scores['Hornets'], 1, 'Incorrect Score calculation')
+        self.assertNotEqual(scores['Hornets'], 3, 'Incorrect Score calculation')
 
     def test_sortRankings(self):
         test_list = {'CC': 2, 'BB': 3, 'AA': 2}
         ranking = sortRankings(test_list)
         self.assertEqual(ranking[0][0], 'BB', 'Incorrect score order')
         self.assertEqual(ranking[1][0], 'AA', 'Incorrect score order')
+        self.assertNotEqual(ranking[1][0], 'CC', 'Incorrect score order')
 
 if __name__ == '__main__':
     unittest.main()

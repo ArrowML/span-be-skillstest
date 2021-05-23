@@ -45,6 +45,7 @@ def calcScores(games: List):
             team_scores[game['team2_name']] += score['draw']     
     return team_scores
 
+#sort by score and then alphabetically
 def sortRankings(team_scores: Dict):
     ranking = sorted(team_scores.items(), key=lambda x: (-x[1], x[0]))
     return ranking
